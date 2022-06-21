@@ -1,0 +1,31 @@
+{
+  "name": "chat-script-cdn",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx webpack --config webpack.config.js --env goal=local --env production --progress",
+    "scss": "node-sass src/styles/index.scss dist/style.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/pimex/chat-script-cdn.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/pimex/chat-script-cdn/issues"
+  },
+  "homepage": "https://gitlab.com/pimex/chat-script-cdn#readme",
+  "devDependencies": {
+    "webpack": "^5.56.1",
+    "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "axios": "^0.22.0",
+    "mixpanel-browser": "^2.41.0",
+    "string-replace-loader": "^3.0.3"
+  }
+}
