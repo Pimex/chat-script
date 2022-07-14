@@ -1,78 +1,81 @@
 import mixpanel from './plugins/track'
 
-const URL_API = 'http://localhost:5000'
+const URL_API = 'http://localhost:3001/chats'
 const URL_WIDGET = 'http://localhost:8081'
 let f = false
-let chatData = {}
 let iframeContainer = null
+
+const Base64 = {
+  encode: string => Buffer.from(string, 'utf8').toString('base64'),
+  decode: string => Buffer.from(string, 'base64').toString('utf8')
+}
 
 async function getLocation () {
   try {
-    const location = await fetch('https://freegeoip.app/json/', {
-      method: 'GET'
-    })
-    const { city, country_name } = await location.json()
-    return city || country_name
+    const location = (
+      await fetch('https://freegeoip.app/json/', {
+        method: 'GET'
+      })
+    ).json()
+    return location.city || location.country_name
   } catch (e) {
     return ''
   }
 }
 
-async function createChat (auth, boardInfo) {
-  const userId = await (
-    await fetch(`${URL_API}/users`, {
-      method: 'GET',
-      headers: { Authorization: auth }
-    })
-  ).json()
+async function createChat (auth, boardId) {
   const location = await getLocation()
-  const newChat = await (
-    await fetch(`${URL_API}/chats`, {
-      method: 'POST',
-      headers: {
-        Authorization: auth,
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        boardId: boardInfo.id,
-        location,
-        origin: 'Chat',
-        userId
+  const newChat = (
+    await (
+      await fetch(`${URL_API}`, {
+        method: 'POST',
+        headers: {
+          Authorization: auth,
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          boardId,
+          location
+        })
       })
-    })
-  ).json()
-  const chatInfo = { id: newChat.id, userId: userId }
-  localStorage.setItem('pimexChatData', JSON.stringify(chatInfo))
+    ).json()
+  ).data
+
+  const chatInfo = {
+    chatId: newChat.id,
+    contactId: newChat.contactInfo.id
+  }
+
+  localStorage.setItem('pimexChatData', Base64.encode(JSON.stringify(chatInfo)))
+
   return chatInfo
 }
 
-async function getChatConfig (auth, boardInfo) {
-  const responseChatConfig = await fetch(
-    `${URL_API}/chats/${boardInfo.id}/settings`,
-    {
-      method: 'GET',
-      headers: { Authorization: auth }
-    }
-  )
-  const chatConfig = await responseChatConfig.json()
-  return chatConfig
+async function getChatsSettings (auth, boardId) {
+  return (
+    await (
+      await fetch(`${URL_API}/settings/${boardId}`, {
+        method: 'GET',
+        headers: { Authorization: auth }
+      })
+    ).json()
+  ).data
 }
 
-window.ChatPimex = {
+window.ChatsPimex = {
   init: async function ({ id, token }) {
-    const auth = 'Basic ' + btoa(`${id}:${token}`)
+    const auth = 'Basic ' + Base64.encode(`${id}:${token}`)
     const buttonId = 'button-pimex-cf414d48-aca2-4c94-ba9a-9170d8df4a79'
-
-    const chatConfig = await getChatConfig(auth, { id, token })
+    const chatsSettings = await getChatsSettings(auth, id)
 
     const buttonStyles = `
     #${buttonId} {
-      background-color: ${chatConfig.color};
+      background-color: ${chatsSettings.color};
       border-radius: 50%;
       position: fixed;
-      bottom: ${chatConfig.margin.bottom}px;
-      right: ${chatConfig.margin.right}px;
+      bottom: ${chatsSettings.margin.bottom}px;
+      right: ${chatsSettings.margin.right}px;
       z-index: 10000;
       width: 60px;
       height: 60px;
@@ -210,9 +213,10 @@ window.ChatPimex = {
 
     buttonRef.onclick = async function () {
       if (!f) {
-        chatData =
-          JSON.parse(localStorage.getItem('pimexChatData')) ||
-          (await createChat(auth, { id, token }))
+        const localChatData = JSON.parse(
+          Base64.decode(localStorage.getItem('pimexChatData'))
+        )
+        const chatData = localChatData || (await createChat(auth, id))
 
         const iframeId = `chat-pimex-${chatData.id}`
 
@@ -287,7 +291,7 @@ window.ChatPimex = {
         iframeLoader.classList.add('loader')
 
         const iframeRef = document.createElement('iframe')
-        iframeRef.src = `${URL_WIDGET}/${chatData.userId}/${chatData.id}/${id}/${token}`
+        iframeRef.src = `${URL_WIDGET}/${chatData.contactId}/${chatData.id}/${id}/${token}`
 
         iframeContainer.appendChild(iframeRef)
         iframeContainer.appendChild(iframeLoader)
@@ -307,8 +311,8 @@ window.ChatPimex = {
 
     setTimeout(() => {
       buttonRef.classList.add('loaded')
-      console.log('Chat Pimex v2 init')
-      mixpanel.track('chat.customer.view-page', { userId: chatData.userId }) // Track
+      console.log('Chat Pimex v1 init')
+      mixpanel.track('chat.customer.view-page') // Track
     }, 500)
   }
 }
