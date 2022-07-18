@@ -1,4 +1,5 @@
 import mixpanel from './plugins/track'
+import { Buffer } from 'buffer'
 
 const URL_API = 'http://localhost:3001/chats'
 const URL_WIDGET = 'http://localhost:8081'

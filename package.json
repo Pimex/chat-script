@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "axios": "^0.22.0",
+    "buffer": "^6.0.3",
     "mixpanel-browser": "^2.41.0",
     "string-replace-loader": "^3.0.3"
   }
