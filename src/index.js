@@ -214,15 +214,9 @@ window.ChatsPimex = {
 
     buttonRef.onclick = async function () {
       if (!f) {
-        if (localStorage.pimexChatData) {
-          console.log('No data')
-        } else {
-          console.log(localStorage.getItem('pimexChatData'))
-        }
-        const localChatData = JSON.parse(
-          Base64.decode(localStorage.getItem('pimexChatData'))
-        )
-        const chatData = localChatData || (await createChat(auth, id))
+        const chatData = localStorage.pimexChatData
+          ? JSON.parse(Base64.decode(localStorage.getItem('pimexChatData')))
+          : await createChat(auth, id)
 
         const iframeId = `chat-pimex-${chatData.id}`
 
