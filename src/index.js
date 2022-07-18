@@ -14,14 +14,12 @@ const Base64 = {
 
 async function getLocation () {
   try {
-    const location = await (
+    const { data } = await (
       await fetch(`https://api.ipbase.com/v2/info?apikey=${IPBASE_KEY}`, {
         method: 'GET'
       })
     ).json()
-    console.log(location)
-    return 'Test'
-    // return location.city || location.country_name
+    return data.location.city || data.location.country.name || 'no-location'
   } catch (e) {
     return ''
   }
@@ -221,7 +219,7 @@ window.ChatsPimex = {
           ? JSON.parse(Base64.decode(localStorage.getItem('pimexChatData')))
           : await createChat(auth, id)
 
-        const iframeId = `chat-pimex-${chatData.id}`
+        const iframeId = `chat-pimex-${chatData.chatId}`
 
         const iframeStyles = `
         #${iframeId} {
@@ -294,7 +292,7 @@ window.ChatsPimex = {
         iframeLoader.classList.add('loader')
 
         const iframeRef = document.createElement('iframe')
-        iframeRef.src = `${URL_WIDGET}/${chatData.contactId}/${chatData.id}/${id}/${token}`
+        iframeRef.src = `${URL_WIDGET}/${chatData.contactId}/${chatData.chatId}/${id}/${token}`
 
         iframeContainer.appendChild(iframeRef)
         iframeContainer.appendChild(iframeLoader)
