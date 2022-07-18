@@ -214,6 +214,11 @@ window.ChatsPimex = {
 
     buttonRef.onclick = async function () {
       if (!f) {
+        if (localStorage.pimexChatData) {
+          console.log('No data')
+        } else {
+          console.log(localStorage.getItem('pimexChatData'))
+        }
         const localChatData = JSON.parse(
           Base64.decode(localStorage.getItem('pimexChatData'))
         )
