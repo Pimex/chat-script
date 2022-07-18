@@ -3,6 +3,7 @@ import { Buffer } from 'buffer'
 
 const URL_API = 'http://localhost:3001/chats'
 const URL_WIDGET = 'http://localhost:8081'
+const IPBASE_KEY = 'GQOfwznDcF99OOUQh6TCuglbOYBE9nI9x5kmb6eZ'
 let f = false
 let iframeContainer = null
 
@@ -13,12 +14,14 @@ const Base64 = {
 
 async function getLocation () {
   try {
-    const location = (
-      await fetch('https://freegeoip.app/json/', {
+    const location = await (
+      await fetch(`https://api.ipbase.com/v2/info?apikey=${IPBASE_KEY}`, {
         method: 'GET'
       })
     ).json()
-    return location.city || location.country_name
+    console.log(location)
+    return 'Test'
+    // return location.city || location.country_name
   } catch (e) {
     return ''
   }
