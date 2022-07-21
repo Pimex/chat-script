@@ -19,7 +19,9 @@ async function getLocation () {
         method: 'GET'
       })
     ).json()
-    return data.location.city || data.location.country.name || 'no-location'
+    return (
+      data.location.city.name || data.location.country.name || 'no-location'
+    )
   } catch (e) {
     return ''
   }
